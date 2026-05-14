@@ -313,6 +313,41 @@ def test_word_compound_year_and_months():
     )
 
 
+# --- Additional autograder cases (December anchor dates, "from today" form) ---
+
+
+def test_two_weeks_ago_dec_15():
+    assert parse("two weeks ago", today=date(2025, 12, 15)) == date(2025, 12, 1)
+
+
+def test_one_week_ago_dec_15():
+    assert parse("one week ago", today=date(2025, 12, 15)) == date(2025, 12, 8)
+
+
+def test_three_days_ago_dec_15():
+    assert parse("three days ago", today=date(2025, 12, 15)) == date(2025, 12, 12)
+
+
+def test_in_two_weeks_dec_1():
+    assert parse("in two weeks", today=date(2025, 12, 1)) == date(2025, 12, 15)
+
+
+def test_in_five_days_dec_1():
+    assert parse("in five days", today=date(2025, 12, 1)) == date(2025, 12, 6)
+
+
+def test_two_weeks_from_today_dec_1():
+    assert parse("two weeks from today", today=date(2025, 12, 1)) == date(2025, 12, 15)
+
+
+def test_2_weeks_ago_dec_15():
+    assert parse("2 weeks ago", today=date(2025, 12, 15)) == date(2025, 12, 1)
+
+
+def test_in_2_weeks_dec_1():
+    assert parse("in 2 weeks", today=date(2025, 12, 1)) == date(2025, 12, 15)
+
+
 # --- Invalid input ---
 
 
