@@ -348,6 +348,33 @@ def test_in_2_weeks_dec_1():
     assert parse("in 2 weeks", today=date(2025, 12, 1)) == date(2025, 12, 15)
 
 
+# --- "now" as synonym for today ---
+
+
+def test_now_singleton():
+    assert parse("now", today=TODAY) == date(2025, 6, 4)
+
+
+def test_two_weeks_from_now():
+    assert parse("2 weeks from now", today=TODAY) == date(2025, 6, 18)
+
+
+def test_five_days_from_now():
+    assert parse("5 days from now", today=TODAY) == date(2025, 6, 9)
+
+
+def test_a_week_from_now():
+    assert parse("a week from now", today=TODAY) == date(2025, 6, 11)
+
+
+def test_word_three_months_from_now():
+    assert parse("three months from now", today=TODAY) == date(2025, 9, 4)
+
+
+def test_days_before_now():
+    assert parse("3 days before now", today=TODAY) == date(2025, 6, 1)
+
+
 # --- Invalid input ---
 
 

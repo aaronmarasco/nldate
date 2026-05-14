@@ -154,7 +154,7 @@ def _parse_absolute(text: str) -> date | None:
 
 def _parse_anchor(text: str, today: date) -> date | None:
     text = text.strip()
-    if text == "today":
+    if text in ("today", "now"):
         return today
     if text == "tomorrow":
         return today + timedelta(days=1)
@@ -178,7 +178,7 @@ def parse(s: str, today: date | None = None) -> date:
     if today is None:
         today = date.today()
 
-    if normalized == "today":
+    if normalized in ("today", "now"):
         return today
     if normalized == "tomorrow":
         return today + timedelta(days=1)
