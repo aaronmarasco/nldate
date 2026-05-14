@@ -255,6 +255,64 @@ def test_compound_with_a_year():
     assert parse("a year and 2 months after yesterday", today=TODAY) == date(2026, 8, 3)
 
 
+# --- English number words ---
+
+
+def test_one_day_ago():
+    assert parse("one day ago", today=TODAY) == date(2025, 6, 3)
+
+
+def test_two_weeks_ago():
+    assert parse("two weeks ago", today=TODAY) == date(2025, 5, 21)
+
+
+def test_three_days_ago():
+    assert parse("three days ago", today=TODAY) == date(2025, 6, 1)
+
+
+def test_six_months_ago():
+    assert parse("six months ago", today=TODAY) == date(2024, 12, 4)
+
+
+def test_in_two_weeks_word():
+    assert parse("in two weeks", today=TODAY) == date(2025, 6, 18)
+
+
+def test_in_five_days_word():
+    assert parse("in five days", today=TODAY) == date(2025, 6, 9)
+
+
+def test_in_three_months_word():
+    assert parse("in three months", today=TODAY) == date(2025, 9, 4)
+
+
+def test_in_ten_years_word():
+    assert parse("in ten years", today=TODAY) == date(2035, 6, 4)
+
+
+def test_eleven_days_ago():
+    assert parse("eleven days ago", today=TODAY) == date(2025, 5, 24)
+
+
+def test_twelve_months_ago():
+    assert parse("twelve months ago", today=TODAY) == date(2024, 6, 4)
+
+
+def test_word_anchored_before():
+    assert parse("two days before December 1, 2025") == date(2025, 11, 29)
+
+
+def test_word_anchored_after():
+    assert parse("three weeks after January 1, 2026") == date(2026, 1, 22)
+
+
+def test_word_compound_year_and_months():
+    # yesterday = 2025-06-03; +1 year -> 2026-06-03; +2 months -> 2026-08-03
+    assert parse("one year and two months after yesterday", today=TODAY) == date(
+        2026, 8, 3
+    )
+
+
 # --- Invalid input ---
 
 

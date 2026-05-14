@@ -44,6 +44,21 @@ MONTHS: dict[str, int] = {
     "dec": 12,
 }
 
+WORD_NUMBERS: dict[str, int] = {
+    "one": 1,
+    "two": 2,
+    "three": 3,
+    "four": 4,
+    "five": 5,
+    "six": 6,
+    "seven": 7,
+    "eight": 8,
+    "nine": 9,
+    "ten": 10,
+    "eleven": 11,
+    "twelve": 12,
+}
+
 UNIT_TO_FIELD: dict[str, str] = {
     "day": "days",
     "days": "days",
@@ -66,7 +81,7 @@ _AGO_RE = re.compile(r"^(.+)\s+ago$")
 _BEFORE_RE = re.compile(r"^(.+?)\s+before\s+(.+)$")
 _AFTER_RE = re.compile(r"^(.+?)\s+after\s+(.+)$")
 _FROM_RE = re.compile(r"^(.+?)\s+from\s+(.+)$")
-_OFFSET_CHUNK_RE = re.compile(r"^(\d+|an?)\s+([a-z]+)$")
+_OFFSET_CHUNK_RE = re.compile(rf"^(\d+|an?|{'|'.join(WORD_NUMBERS)})\s+([a-z]+)$")
 
 
 def _add_months(d: date, n: int) -> date:
@@ -105,7 +120,12 @@ def _parse_offset(text: str) -> dict[str, int]:
         if not m:
             raise ValueError(f"Could not parse offset chunk: {part!r}")
         n_str = m.group(1)
-        n = 1 if n_str in ("a", "an") else int(n_str)
+        if n_str in ("a", "an"):
+            n = 1
+        elif n_str in WORD_NUMBERS:
+            n = WORD_NUMBERS[n_str]
+        else:
+            n = int(n_str)
         unit = m.group(2)
         if unit not in UNIT_TO_FIELD:
             raise ValueError(f"Unknown unit: {unit!r}")
