@@ -18,32 +18,47 @@ WEEKDAYS: dict[str, int] = {
 }
 
 MONTHS: dict[str, int] = {
-    "january": 1, "jan": 1,
-    "february": 2, "feb": 2,
-    "march": 3, "mar": 3,
-    "april": 4, "apr": 4,
+    "january": 1,
+    "jan": 1,
+    "february": 2,
+    "feb": 2,
+    "march": 3,
+    "mar": 3,
+    "april": 4,
+    "apr": 4,
     "may": 5,
-    "june": 6, "jun": 6,
-    "july": 7, "jul": 7,
-    "august": 8, "aug": 8,
-    "september": 9, "sep": 9, "sept": 9,
-    "october": 10, "oct": 10,
-    "november": 11, "nov": 11,
-    "december": 12, "dec": 12,
+    "june": 6,
+    "jun": 6,
+    "july": 7,
+    "jul": 7,
+    "august": 8,
+    "aug": 8,
+    "september": 9,
+    "sep": 9,
+    "sept": 9,
+    "october": 10,
+    "oct": 10,
+    "november": 11,
+    "nov": 11,
+    "december": 12,
+    "dec": 12,
 }
 
 UNIT_TO_FIELD: dict[str, str] = {
-    "day": "days", "days": "days",
-    "week": "weeks", "weeks": "weeks",
-    "month": "months", "months": "months",
-    "year": "years", "years": "years",
+    "day": "days",
+    "days": "days",
+    "week": "weeks",
+    "weeks": "weeks",
+    "month": "months",
+    "months": "months",
+    "year": "years",
+    "years": "years",
 }
 
 _ISO_RE = re.compile(r"^(\d{4})-(\d{1,2})-(\d{1,2})$")
+_ISO_SLASH_RE = re.compile(r"^(\d{4})/(\d{1,2})/(\d{1,2})$")
 _US_RE = re.compile(r"^(\d{1,2})/(\d{1,2})/(\d{4})$")
-_MONTH_NAME_RE = re.compile(
-    r"^([a-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})$"
-)
+_MONTH_NAME_RE = re.compile(r"^([a-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})$")
 _NEXT_WD_RE = re.compile(r"^next\s+([a-z]+)$")
 _LAST_WD_RE = re.compile(r"^last\s+([a-z]+)$")
 _IN_RE = re.compile(r"^in\s+(.+)$")
@@ -99,6 +114,9 @@ def _parse_offset(text: str) -> dict[str, int]:
 
 def _parse_absolute(text: str) -> date | None:
     m = _ISO_RE.match(text)
+    if m:
+        return date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+    m = _ISO_SLASH_RE.match(text)
     if m:
         return date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
     m = _US_RE.match(text)

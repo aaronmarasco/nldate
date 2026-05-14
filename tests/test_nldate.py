@@ -10,6 +10,7 @@ TODAY = date(2025, 6, 4)
 
 # --- Simple relative ---
 
+
 def test_today():
     assert parse("today", today=TODAY) == date(2025, 6, 4)
 
@@ -23,6 +24,7 @@ def test_yesterday():
 
 
 # --- Relative offsets (plural) ---
+
 
 def test_in_3_days():
     assert parse("in 3 days", today=TODAY) == date(2025, 6, 7)
@@ -41,6 +43,7 @@ def test_2_weeks_ago():
 
 
 # --- Singular vs plural units ---
+
 
 def test_in_1_day_singular():
     assert parse("in 1 day", today=TODAY) == date(2025, 6, 5)
@@ -72,6 +75,7 @@ def test_in_2_years_plural():
 
 # --- Weekday expressions (next/last = the named weekday in the adjacent calendar week) ---
 
+
 def test_next_monday():
     assert parse("next Monday", today=TODAY) == date(2025, 6, 9)
 
@@ -90,6 +94,7 @@ def test_last_monday():
 
 # --- Absolute dates with month name ---
 
+
 def test_absolute_full_month_name():
     assert parse("December 1, 2025") == date(2025, 12, 1)
 
@@ -104,6 +109,7 @@ def test_absolute_ordinal_suffix():
 
 # --- Numeric date formats ---
 
+
 def test_numeric_us_slash():
     # US convention: MM/DD/YYYY
     assert parse("12/01/2025") == date(2025, 12, 1)
@@ -113,7 +119,12 @@ def test_numeric_iso_dash():
     assert parse("2025-12-01") == date(2025, 12, 1)
 
 
+def test_numeric_iso_slash():
+    assert parse("2025/12/04") == date(2025, 12, 4)
+
+
 # --- Before / after anchored to an absolute date ---
+
 
 def test_days_before_absolute_date():
     assert parse("5 days before December 1, 2025") == date(2025, 11, 26)
@@ -124,6 +135,7 @@ def test_weeks_after_absolute_date():
 
 
 # --- Compound expressions ---
+
 
 def test_compound_year_and_months_after_yesterday():
     # yesterday = 2025-06-03; +1 year -> 2026-06-03; +2 months -> 2026-08-03
@@ -137,6 +149,7 @@ def test_compound_weeks_and_days_from_today():
 
 # --- Capitalization and whitespace ---
 
+
 def test_capitalization_and_whitespace_relative():
     assert parse("  TOMORROW  ", today=TODAY) == date(2025, 6, 5)
 
@@ -146,6 +159,7 @@ def test_capitalization_absolute():
 
 
 # --- Invalid input ---
+
 
 def test_invalid_gibberish_raises():
     with pytest.raises(ValueError):
