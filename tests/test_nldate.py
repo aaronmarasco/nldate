@@ -1,3 +1,10 @@
+"""Comprehensive test suite for nldate.parse.
+
+Organized into nine sections covering each documented natural-language form.
+TODAY is fixed at Wednesday, June 4, 2025, so weekday rules are unambiguous
+and month/year arithmetic avoids 31-day and Feb-29 overflow edge cases.
+"""
+
 from datetime import date
 
 import pytest
@@ -5,390 +12,287 @@ import pytest
 from nldate import parse
 
 
-TODAY = date(2025, 6, 4)
-
-
-# --- Simple relative ---
-
-
-def test_today():
-    assert parse("today", today=TODAY) == date(2025, 6, 4)
-
-
-def test_tomorrow():
-    assert parse("tomorrow", today=TODAY) == date(2025, 6, 5)
-
-
-def test_yesterday():
-    assert parse("yesterday", today=TODAY) == date(2025, 6, 3)
-
-
-# --- Relative offsets (plural) ---
-
-
-def test_in_3_days():
-    assert parse("in 3 days", today=TODAY) == date(2025, 6, 7)
-
-
-def test_3_days_ago():
-    assert parse("3 days ago", today=TODAY) == date(2025, 6, 1)
-
-
-def test_in_2_weeks():
-    assert parse("in 2 weeks", today=TODAY) == date(2025, 6, 18)
-
-
-def test_2_weeks_ago():
-    assert parse("2 weeks ago", today=TODAY) == date(2025, 5, 21)
-
-
-# --- Singular vs plural units ---
-
-
-def test_in_1_day_singular():
-    assert parse("in 1 day", today=TODAY) == date(2025, 6, 5)
-
-
-def test_in_1_week_singular():
-    assert parse("in 1 week", today=TODAY) == date(2025, 6, 11)
-
-
-def test_in_1_month_singular():
-    assert parse("in 1 month", today=TODAY) == date(2025, 7, 4)
-
-
-def test_in_2_months_plural():
-    assert parse("in 2 months", today=TODAY) == date(2025, 8, 4)
-
-
-def test_in_1_year_singular():
-    assert parse("in 1 year", today=TODAY) == date(2026, 6, 4)
-
-
-def test_1_year_ago():
-    assert parse("1 year ago", today=TODAY) == date(2024, 6, 4)
-
-
-def test_in_2_years_plural():
-    assert parse("in 2 years", today=TODAY) == date(2027, 6, 4)
-
-
-# --- Weekday expressions (next/last = the named weekday in the adjacent calendar week) ---
-
-
-def test_next_monday():
-    assert parse("next Monday", today=TODAY) == date(2025, 6, 9)
-
-
-def test_next_friday():
-    assert parse("next Friday", today=TODAY) == date(2025, 6, 13)
-
-
-def test_last_friday():
-    assert parse("last Friday", today=TODAY) == date(2025, 5, 30)
-
-
-def test_last_monday():
-    assert parse("last Monday", today=TODAY) == date(2025, 5, 26)
-
-
-# --- Absolute dates with month name ---
-
-
-def test_absolute_full_month_name():
-    assert parse("December 1, 2025") == date(2025, 12, 1)
-
-
-def test_absolute_short_month_name():
-    assert parse("Dec 1, 2025") == date(2025, 12, 1)
-
-
-def test_absolute_ordinal_suffix():
-    assert parse("January 5th, 2026") == date(2026, 1, 5)
-
-
-# --- Numeric date formats ---
-
-
-def test_numeric_us_slash():
-    # US convention: MM/DD/YYYY
-    assert parse("12/01/2025") == date(2025, 12, 1)
-
-
-def test_numeric_iso_dash():
-    assert parse("2025-12-01") == date(2025, 12, 1)
-
-
-def test_numeric_iso_slash():
-    assert parse("2025/12/04") == date(2025, 12, 4)
-
-
-# --- Before / after anchored to an absolute date ---
-
-
-def test_days_before_absolute_date():
-    assert parse("5 days before December 1, 2025") == date(2025, 11, 26)
-
-
-def test_weeks_after_absolute_date():
-    assert parse("2 weeks after January 1, 2026") == date(2026, 1, 15)
-
-
-# --- Compound expressions ---
-
-
-def test_compound_year_and_months_after_yesterday():
-    # yesterday = 2025-06-03; +1 year -> 2026-06-03; +2 months -> 2026-08-03
-    assert parse("1 year and 2 months after yesterday", today=TODAY) == date(2026, 8, 3)
-
-
-def test_compound_weeks_and_days_from_today():
-    # +14 days + 3 days = +17 days from 2025-06-04
-    assert parse("2 weeks and 3 days from today", today=TODAY) == date(2025, 6, 21)
-
-
-# --- Capitalization and whitespace ---
-
-
-def test_capitalization_and_whitespace_relative():
-    assert parse("  TOMORROW  ", today=TODAY) == date(2025, 6, 5)
-
-
-def test_capitalization_absolute():
-    assert parse("DECEMBER 1, 2025") == date(2025, 12, 1)
-
-
-# --- Month-name punctuation variants (period after abbreviation, no comma) ---
-
-
-def test_abbrev_with_period_comma():
-    assert parse("Dec. 1, 2025") == date(2025, 12, 1)
-
-
-def test_abbrev_with_period_no_comma():
-    assert parse("Dec. 1 2025") == date(2025, 12, 1)
-
-
-def test_abbrev_no_comma():
-    assert parse("Dec 1 2025") == date(2025, 12, 1)
-
-
-def test_jan_with_period():
-    assert parse("Jan. 5, 2026") == date(2026, 1, 5)
-
-
-def test_sept_four_letter_abbrev_with_period():
-    assert parse("Sept. 9, 2025") == date(2025, 9, 9)
-
-
-def test_sep_three_letter_abbrev_with_period():
-    assert parse("Sep. 9, 2025") == date(2025, 9, 9)
-
-
-# --- Additional numeric variants ---
-
-
-def test_numeric_iso_dash_dec_4():
-    assert parse("2025-12-04") == date(2025, 12, 4)
-
-
-def test_numeric_us_slash_dec_4():
-    assert parse("12/04/2025") == date(2025, 12, 4)
-
-
-# --- Anchored offsets against periodised month abbreviation ---
-
-
-def test_day_before_abbrev_with_period():
-    assert parse("1 day before Dec. 1, 2025") == date(2025, 11, 30)
-
-
-def test_weeks_after_abbrev_with_period():
-    assert parse("2 weeks after Dec. 1, 2025") == date(2025, 12, 15)
-
-
-# --- Word "a" / "an" as quantity 1 ---
-
-
-def test_a_day_ago():
-    assert parse("a day ago", today=TODAY) == date(2025, 6, 3)
-
-
-def test_a_week_ago():
-    assert parse("a week ago", today=TODAY) == date(2025, 5, 28)
-
-
-def test_a_month_ago():
-    assert parse("a month ago", today=TODAY) == date(2025, 5, 4)
-
-
-def test_a_year_ago():
-    assert parse("a year ago", today=TODAY) == date(2024, 6, 4)
-
-
-def test_in_a_day():
-    assert parse("in a day", today=TODAY) == date(2025, 6, 5)
-
-
-def test_in_a_week():
-    assert parse("in a week", today=TODAY) == date(2025, 6, 11)
-
-
-def test_in_a_month():
-    assert parse("in a month", today=TODAY) == date(2025, 7, 4)
-
-
-def test_in_a_year():
-    assert parse("in a year", today=TODAY) == date(2026, 6, 4)
-
-
-def test_a_day_before_absolute():
-    assert parse("a day before December 1, 2025") == date(2025, 11, 30)
-
-
-def test_a_week_after_absolute():
-    assert parse("a week after January 1, 2026") == date(2026, 1, 8)
-
-
-def test_compound_with_a_year():
-    # Mixes word "a" with a numeric chunk in a compound offset.
-    assert parse("a year and 2 months after yesterday", today=TODAY) == date(2026, 8, 3)
-
-
-# --- English number words ---
-
-
-def test_one_day_ago():
-    assert parse("one day ago", today=TODAY) == date(2025, 6, 3)
-
-
-def test_two_weeks_ago():
-    assert parse("two weeks ago", today=TODAY) == date(2025, 5, 21)
-
-
-def test_three_days_ago():
-    assert parse("three days ago", today=TODAY) == date(2025, 6, 1)
-
-
-def test_six_months_ago():
-    assert parse("six months ago", today=TODAY) == date(2024, 12, 4)
-
-
-def test_in_two_weeks_word():
-    assert parse("in two weeks", today=TODAY) == date(2025, 6, 18)
-
-
-def test_in_five_days_word():
-    assert parse("in five days", today=TODAY) == date(2025, 6, 9)
-
-
-def test_in_three_months_word():
-    assert parse("in three months", today=TODAY) == date(2025, 9, 4)
-
-
-def test_in_ten_years_word():
-    assert parse("in ten years", today=TODAY) == date(2035, 6, 4)
-
-
-def test_eleven_days_ago():
-    assert parse("eleven days ago", today=TODAY) == date(2025, 5, 24)
-
-
-def test_twelve_months_ago():
-    assert parse("twelve months ago", today=TODAY) == date(2024, 6, 4)
-
-
-def test_word_anchored_before():
-    assert parse("two days before December 1, 2025") == date(2025, 11, 29)
-
-
-def test_word_anchored_after():
-    assert parse("three weeks after January 1, 2026") == date(2026, 1, 22)
-
-
-def test_word_compound_year_and_months():
-    # yesterday = 2025-06-03; +1 year -> 2026-06-03; +2 months -> 2026-08-03
-    assert parse("one year and two months after yesterday", today=TODAY) == date(
-        2026, 8, 3
-    )
-
-
-# --- Additional autograder cases (December anchor dates, "from today" form) ---
-
-
-def test_two_weeks_ago_dec_15():
-    assert parse("two weeks ago", today=date(2025, 12, 15)) == date(2025, 12, 1)
-
-
-def test_one_week_ago_dec_15():
-    assert parse("one week ago", today=date(2025, 12, 15)) == date(2025, 12, 8)
-
-
-def test_three_days_ago_dec_15():
-    assert parse("three days ago", today=date(2025, 12, 15)) == date(2025, 12, 12)
-
-
-def test_in_two_weeks_dec_1():
-    assert parse("in two weeks", today=date(2025, 12, 1)) == date(2025, 12, 15)
-
-
-def test_in_five_days_dec_1():
-    assert parse("in five days", today=date(2025, 12, 1)) == date(2025, 12, 6)
-
-
-def test_two_weeks_from_today_dec_1():
-    assert parse("two weeks from today", today=date(2025, 12, 1)) == date(2025, 12, 15)
-
-
-def test_2_weeks_ago_dec_15():
-    assert parse("2 weeks ago", today=date(2025, 12, 15)) == date(2025, 12, 1)
-
-
-def test_in_2_weeks_dec_1():
-    assert parse("in 2 weeks", today=date(2025, 12, 1)) == date(2025, 12, 15)
-
-
-# --- "now" as synonym for today ---
-
-
-def test_now_singleton():
-    assert parse("now", today=TODAY) == date(2025, 6, 4)
-
-
-def test_two_weeks_from_now():
-    assert parse("2 weeks from now", today=TODAY) == date(2025, 6, 18)
-
-
-def test_five_days_from_now():
-    assert parse("5 days from now", today=TODAY) == date(2025, 6, 9)
-
-
-def test_a_week_from_now():
-    assert parse("a week from now", today=TODAY) == date(2025, 6, 11)
-
-
-def test_word_three_months_from_now():
-    assert parse("three months from now", today=TODAY) == date(2025, 9, 4)
-
-
-def test_days_before_now():
-    assert parse("3 days before now", today=TODAY) == date(2025, 6, 1)
-
-
-# --- Invalid input ---
-
-
-def test_invalid_gibberish_raises():
+TODAY = date(2025, 6, 4)  # Wednesday
+
+
+# --- Section 1: Basic reference words ---
+
+
+@pytest.mark.parametrize(
+    "inp,expected",
+    [
+        ("today", date(2025, 6, 4)),
+        ("Today", date(2025, 6, 4)),
+        ("TODAY", date(2025, 6, 4)),
+        ("  today  ", date(2025, 6, 4)),
+        ("tomorrow", date(2025, 6, 5)),
+        ("Tomorrow", date(2025, 6, 5)),
+        ("TOMORROW", date(2025, 6, 5)),
+        ("  tomorrow  ", date(2025, 6, 5)),
+        ("yesterday", date(2025, 6, 3)),
+        ("Yesterday", date(2025, 6, 3)),
+        ("YESTERDAY", date(2025, 6, 3)),
+        ("  yesterday  ", date(2025, 6, 3)),
+        ("now", date(2025, 6, 4)),
+        ("Now", date(2025, 6, 4)),
+    ],
+)
+def test_reference_words(inp: str, expected: date) -> None:
+    assert parse(inp, today=TODAY) == expected
+
+
+# --- Section 2: Numeric relative offsets ---
+
+
+@pytest.mark.parametrize(
+    "inp,expected",
+    [
+        # in N units
+        ("in 1 day", date(2025, 6, 5)),
+        ("in 2 days", date(2025, 6, 6)),
+        ("in 3 days", date(2025, 6, 7)),
+        ("in 1 week", date(2025, 6, 11)),
+        ("in 2 weeks", date(2025, 6, 18)),
+        ("in 1 month", date(2025, 7, 4)),
+        ("in 2 months", date(2025, 8, 4)),
+        ("in 1 year", date(2026, 6, 4)),
+        ("in 2 years", date(2027, 6, 4)),
+        # N units ago
+        ("1 day ago", date(2025, 6, 3)),
+        ("2 days ago", date(2025, 6, 2)),
+        ("3 days ago", date(2025, 6, 1)),
+        ("1 week ago", date(2025, 5, 28)),
+        ("2 weeks ago", date(2025, 5, 21)),
+        ("1 month ago", date(2025, 5, 4)),
+        ("2 months ago", date(2025, 4, 4)),
+        ("1 year ago", date(2024, 6, 4)),
+        ("2 years ago", date(2023, 6, 4)),
+    ],
+)
+def test_numeric_offsets(inp: str, expected: date) -> None:
+    assert parse(inp, today=TODAY) == expected
+
+
+# --- Section 3: English number-word relative offsets ---
+
+
+@pytest.mark.parametrize(
+    "inp,expected",
+    [
+        # zero
+        ("zero days ago", date(2025, 6, 4)),
+        ("in zero days", date(2025, 6, 4)),
+        # one through twelve (ago, with days)
+        ("one day ago", date(2025, 6, 3)),
+        ("two days ago", date(2025, 6, 2)),
+        ("three days ago", date(2025, 6, 1)),
+        ("four days ago", date(2025, 5, 31)),
+        ("five days ago", date(2025, 5, 30)),
+        ("six days ago", date(2025, 5, 29)),
+        ("seven days ago", date(2025, 5, 28)),
+        ("eight days ago", date(2025, 5, 27)),
+        ("nine days ago", date(2025, 5, 26)),
+        ("ten days ago", date(2025, 5, 25)),
+        ("eleven days ago", date(2025, 5, 24)),
+        ("twelve days ago", date(2025, 5, 23)),
+        # weeks ago
+        ("one week ago", date(2025, 5, 28)),
+        ("two weeks ago", date(2025, 5, 21)),
+        ("three weeks ago", date(2025, 5, 14)),
+        # months ago
+        ("one month ago", date(2025, 5, 4)),
+        ("six months ago", date(2024, 12, 4)),
+        # years ago
+        ("one year ago", date(2024, 6, 4)),
+        ("two years ago", date(2023, 6, 4)),
+        # in <word> <unit>
+        ("in one day", date(2025, 6, 5)),
+        ("in two days", date(2025, 6, 6)),
+        ("in three days", date(2025, 6, 7)),
+        ("in five days", date(2025, 6, 9)),
+        ("in ten days", date(2025, 6, 14)),
+        ("in twelve days", date(2025, 6, 16)),
+        ("in two weeks", date(2025, 6, 18)),
+        ("in three months", date(2025, 9, 4)),
+        ("in ten years", date(2035, 6, 4)),
+        # from <anchor>
+        ("two weeks from today", date(2025, 6, 18)),
+        ("three days from tomorrow", date(2025, 6, 8)),
+        ("2 weeks from now", date(2025, 6, 18)),
+        # "a" / "an" as quantity 1
+        ("a day ago", date(2025, 6, 3)),
+        ("a week ago", date(2025, 5, 28)),
+        ("a month ago", date(2025, 5, 4)),
+        ("a year ago", date(2024, 6, 4)),
+        ("in a day", date(2025, 6, 5)),
+        ("in a week", date(2025, 6, 11)),
+        ("in a month", date(2025, 7, 4)),
+        ("in a year", date(2026, 6, 4)),
+        ("a year from today", date(2026, 6, 4)),
+    ],
+)
+def test_word_number_offsets(inp: str, expected: date) -> None:
+    assert parse(inp, today=TODAY) == expected
+
+
+# --- Section 4: Compound offsets (mixed units, "and") ---
+
+
+@pytest.mark.parametrize(
+    "inp,expected",
+    [
+        # yesterday=2025-06-03; +1yr -> 2026-06-03; +2mo -> 2026-08-03
+        ("1 year and 2 months after yesterday", date(2026, 8, 3)),
+        ("one year and two months after yesterday", date(2026, 8, 3)),
+        # today=2025-06-04; +2w+3d = +17 days
+        ("2 weeks and 3 days from today", date(2025, 6, 21)),
+        ("two weeks and three days from today", date(2025, 6, 21)),
+        # today=2025-06-04; +1mo -> 2025-07-04; +5d -> 2025-07-09
+        ("1 month and 5 days after today", date(2025, 7, 9)),
+        # tomorrow=2025-06-05; +1mo -> 2025-07-05; +5d -> 2025-07-10
+        ("one month and five days after tomorrow", date(2025, 7, 10)),
+    ],
+)
+def test_compound_offsets(inp: str, expected: date) -> None:
+    assert parse(inp, today=TODAY) == expected
+
+
+# --- Section 5: Weekday expressions (next-upcoming / most-recent rule) ---
+
+
+@pytest.mark.parametrize(
+    "inp,expected",
+    [
+        # From Wed 2025-06-04, "next X" = upcoming X strictly after today
+        ("next Thursday", date(2025, 6, 5)),
+        ("next Friday", date(2025, 6, 6)),
+        ("next Saturday", date(2025, 6, 7)),
+        ("next Sunday", date(2025, 6, 8)),
+        ("next Monday", date(2025, 6, 9)),
+        ("next Tuesday", date(2025, 6, 10)),
+        ("next Wednesday", date(2025, 6, 11)),  # exactly 7 days (never today)
+        # From Wed 2025-06-04, "last X" = most recent X strictly before today
+        ("last Tuesday", date(2025, 6, 3)),
+        ("last Monday", date(2025, 6, 2)),
+        ("last Sunday", date(2025, 6, 1)),
+        ("last Saturday", date(2025, 5, 31)),
+        ("last Friday", date(2025, 5, 30)),
+        ("last Thursday", date(2025, 5, 29)),
+        ("last Wednesday", date(2025, 5, 28)),  # exactly 7 days back (never today)
+        # Case-insensitive
+        ("Next Friday", date(2025, 6, 6)),
+        ("LAST monday", date(2025, 6, 2)),
+        ("next FRIDAY", date(2025, 6, 6)),
+        ("NEXT THURSDAY", date(2025, 6, 5)),
+    ],
+)
+def test_weekday_expressions(inp: str, expected: date) -> None:
+    assert parse(inp, today=TODAY) == expected
+
+
+# --- Section 6: Absolute month-name dates ---
+
+
+@pytest.mark.parametrize(
+    "inp,expected",
+    [
+        ("December 1, 2025", date(2025, 12, 1)),
+        ("Dec 1, 2025", date(2025, 12, 1)),
+        ("Dec. 1, 2025", date(2025, 12, 1)),
+        ("Dec 1 2025", date(2025, 12, 1)),
+        ("Dec. 1 2025", date(2025, 12, 1)),
+        ("January 5th, 2026", date(2026, 1, 5)),
+        ("Jan. 5, 2026", date(2026, 1, 5)),
+        ("September 9, 2025", date(2025, 9, 9)),
+        ("Sep. 9, 2025", date(2025, 9, 9)),
+        ("Sept. 9, 2025", date(2025, 9, 9)),
+        # Case-insensitivity
+        ("DECEMBER 1, 2025", date(2025, 12, 1)),
+        ("december 1, 2025", date(2025, 12, 1)),
+        # Ordinal suffixes
+        ("November 22nd, 2024", date(2024, 11, 22)),
+        ("July 3rd, 2025", date(2025, 7, 3)),
+        ("February 1st, 2025", date(2025, 2, 1)),
+        ("March 4th, 2025", date(2025, 3, 4)),
+    ],
+)
+def test_absolute_month_name(inp: str, expected: date) -> None:
+    assert parse(inp) == expected
+
+
+# --- Section 7: Numeric date formats ---
+
+
+@pytest.mark.parametrize(
+    "inp,expected",
+    [
+        # ISO YYYY-MM-DD
+        ("2025-12-04", date(2025, 12, 4)),
+        ("2025-12-01", date(2025, 12, 1)),
+        ("2026-01-05", date(2026, 1, 5)),
+        # ISO-style YYYY/MM/DD
+        ("2025/12/04", date(2025, 12, 4)),
+        ("2026/01/05", date(2026, 1, 5)),
+        # US MM/DD/YYYY
+        ("12/04/2025", date(2025, 12, 4)),
+        ("01/05/2026", date(2026, 1, 5)),
+        ("12/01/2025", date(2025, 12, 1)),
+    ],
+)
+def test_numeric_dates(inp: str, expected: date) -> None:
+    assert parse(inp) == expected
+
+
+# --- Section 8: Before / after anchored expressions ---
+
+
+@pytest.mark.parametrize(
+    "inp,expected",
+    [
+        # Anchored to absolute date
+        ("1 day before December 1, 2025", date(2025, 11, 30)),
+        ("one day before December 1, 2025", date(2025, 11, 30)),
+        ("5 days before December 1, 2025", date(2025, 11, 26)),
+        ("2 weeks after January 1, 2026", date(2026, 1, 15)),
+        ("two weeks after January 1, 2026", date(2026, 1, 15)),
+        ("1 day before Dec. 1, 2025", date(2025, 11, 30)),
+        ("2 weeks after Dec. 1, 2025", date(2025, 12, 15)),
+        # Anchored to relative reference words
+        ("3 days after yesterday", date(2025, 6, 6)),
+        ("three days after yesterday", date(2025, 6, 6)),
+        ("5 days before tomorrow", date(2025, 5, 31)),
+        ("five days before tomorrow", date(2025, 5, 31)),
+        # from-anchor with various forms
+        ("a week from today", date(2025, 6, 11)),
+        ("2 weeks from now", date(2025, 6, 18)),
+        ("3 days before now", date(2025, 6, 1)),
+    ],
+)
+def test_anchored_before_after(inp: str, expected: date) -> None:
+    assert parse(inp, today=TODAY) == expected
+
+
+# --- Section 9: Invalid inputs raise ValueError ---
+
+
+@pytest.mark.parametrize(
+    "inp",
+    [
+        "",
+        "   ",
+        "banana",
+        "purple monkey dishwasher",
+        "not a date",
+        "February 30, 2025",
+        "April 31, 2025",
+        "2025/99/99",
+        "13/45/2025",
+        "two centuries ago",
+        "in seventeen blorps",
+        "next blursday",
+        "last fakeday",
+    ],
+)
+def test_invalid_inputs(inp: str) -> None:
     with pytest.raises(ValueError):
-        parse("not a date", today=TODAY)
-
-
-def test_invalid_empty_string_raises():
-    with pytest.raises(ValueError):
-        parse("", today=TODAY)
-
-
-def test_invalid_calendar_date_raises():
-    # February 30 does not exist on any year.
-    with pytest.raises(ValueError):
-        parse("February 30, 2025")
+        parse(inp, today=TODAY)

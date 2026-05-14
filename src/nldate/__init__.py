@@ -45,6 +45,7 @@ MONTHS: dict[str, int] = {
 }
 
 WORD_NUMBERS: dict[str, int] = {
+    "zero": 0,
     "one": 1,
     "two": 2,
     "three": 3,
@@ -163,10 +164,18 @@ def _parse_anchor(text: str, today: date) -> date | None:
     return _parse_absolute(text)
 
 
-def _weekday_in_adjacent_week(today: date, weekday: int, shift_weeks: int) -> date:
-    this_monday = today - timedelta(days=today.weekday())
-    target_monday = this_monday + timedelta(weeks=shift_weeks)
-    return target_monday + timedelta(days=weekday)
+def _next_weekday(today: date, weekday: int) -> date:
+    delta = (weekday - today.weekday()) % 7
+    if delta == 0:
+        delta = 7
+    return today + timedelta(days=delta)
+
+
+def _last_weekday(today: date, weekday: int) -> date:
+    delta = (today.weekday() - weekday) % 7
+    if delta == 0:
+        delta = 7
+    return today - timedelta(days=delta)
 
 
 def parse(s: str, today: date | None = None) -> date:
@@ -194,14 +203,14 @@ def parse(s: str, today: date | None = None) -> date:
         wd = m.group(1)
         if wd not in WEEKDAYS:
             raise ValueError(f"Unknown weekday: {wd!r}")
-        return _weekday_in_adjacent_week(today, WEEKDAYS[wd], shift_weeks=1)
+        return _next_weekday(today, WEEKDAYS[wd])
 
     m = _LAST_WD_RE.match(normalized)
     if m:
         wd = m.group(1)
         if wd not in WEEKDAYS:
             raise ValueError(f"Unknown weekday: {wd!r}")
-        return _weekday_in_adjacent_week(today, WEEKDAYS[wd], shift_weeks=-1)
+        return _last_weekday(today, WEEKDAYS[wd])
 
     for pattern, sign in ((_BEFORE_RE, -1), (_AFTER_RE, 1), (_FROM_RE, 1)):
         m = pattern.match(normalized)
