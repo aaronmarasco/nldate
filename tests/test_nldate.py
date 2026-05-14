@@ -266,6 +266,12 @@ def test_numeric_dates(inp: str, expected: date) -> None:
         ("a week from today", date(2025, 6, 11)),
         ("2 weeks from now", date(2025, 6, 18)),
         ("3 days before now", date(2025, 6, 1)),
+        # "the day after tomorrow" / "the day before yesterday" idioms
+        ("the day after tomorrow", date(2025, 6, 6)),
+        ("the day before yesterday", date(2025, 6, 2)),
+        ("The day after tomorrow", date(2025, 6, 6)),
+        ("THE DAY BEFORE YESTERDAY", date(2025, 6, 2)),
+        ("the week after today", date(2025, 6, 11)),
     ],
 )
 def test_anchored_before_after(inp: str, expected: date) -> None:

@@ -82,7 +82,7 @@ _AGO_RE = re.compile(r"^(.+)\s+ago$")
 _BEFORE_RE = re.compile(r"^(.+?)\s+before\s+(.+)$")
 _AFTER_RE = re.compile(r"^(.+?)\s+after\s+(.+)$")
 _FROM_RE = re.compile(r"^(.+?)\s+from\s+(.+)$")
-_OFFSET_CHUNK_RE = re.compile(rf"^(\d+|an?|{'|'.join(WORD_NUMBERS)})\s+([a-z]+)$")
+_OFFSET_CHUNK_RE = re.compile(rf"^(\d+|an?|the|{'|'.join(WORD_NUMBERS)})\s+([a-z]+)$")
 
 
 def _add_months(d: date, n: int) -> date:
@@ -121,7 +121,7 @@ def _parse_offset(text: str) -> dict[str, int]:
         if not m:
             raise ValueError(f"Could not parse offset chunk: {part!r}")
         n_str = m.group(1)
-        if n_str in ("a", "an"):
+        if n_str in ("a", "an", "the"):
             n = 1
         elif n_str in WORD_NUMBERS:
             n = WORD_NUMBERS[n_str]
