@@ -66,7 +66,7 @@ _AGO_RE = re.compile(r"^(.+)\s+ago$")
 _BEFORE_RE = re.compile(r"^(.+?)\s+before\s+(.+)$")
 _AFTER_RE = re.compile(r"^(.+?)\s+after\s+(.+)$")
 _FROM_RE = re.compile(r"^(.+?)\s+from\s+(.+)$")
-_OFFSET_CHUNK_RE = re.compile(r"^(\d+)\s+([a-z]+)$")
+_OFFSET_CHUNK_RE = re.compile(r"^(\d+|an?)\s+([a-z]+)$")
 
 
 def _add_months(d: date, n: int) -> date:
@@ -104,7 +104,8 @@ def _parse_offset(text: str) -> dict[str, int]:
         m = _OFFSET_CHUNK_RE.match(part.strip())
         if not m:
             raise ValueError(f"Could not parse offset chunk: {part!r}")
-        n = int(m.group(1))
+        n_str = m.group(1)
+        n = 1 if n_str in ("a", "an") else int(n_str)
         unit = m.group(2)
         if unit not in UNIT_TO_FIELD:
             raise ValueError(f"Unknown unit: {unit!r}")

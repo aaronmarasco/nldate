@@ -207,6 +207,54 @@ def test_weeks_after_abbrev_with_period():
     assert parse("2 weeks after Dec. 1, 2025") == date(2025, 12, 15)
 
 
+# --- Word "a" / "an" as quantity 1 ---
+
+
+def test_a_day_ago():
+    assert parse("a day ago", today=TODAY) == date(2025, 6, 3)
+
+
+def test_a_week_ago():
+    assert parse("a week ago", today=TODAY) == date(2025, 5, 28)
+
+
+def test_a_month_ago():
+    assert parse("a month ago", today=TODAY) == date(2025, 5, 4)
+
+
+def test_a_year_ago():
+    assert parse("a year ago", today=TODAY) == date(2024, 6, 4)
+
+
+def test_in_a_day():
+    assert parse("in a day", today=TODAY) == date(2025, 6, 5)
+
+
+def test_in_a_week():
+    assert parse("in a week", today=TODAY) == date(2025, 6, 11)
+
+
+def test_in_a_month():
+    assert parse("in a month", today=TODAY) == date(2025, 7, 4)
+
+
+def test_in_a_year():
+    assert parse("in a year", today=TODAY) == date(2026, 6, 4)
+
+
+def test_a_day_before_absolute():
+    assert parse("a day before December 1, 2025") == date(2025, 11, 30)
+
+
+def test_a_week_after_absolute():
+    assert parse("a week after January 1, 2026") == date(2026, 1, 8)
+
+
+def test_compound_with_a_year():
+    # Mixes word "a" with a numeric chunk in a compound offset.
+    assert parse("a year and 2 months after yesterday", today=TODAY) == date(2026, 8, 3)
+
+
 # --- Invalid input ---
 
 
