@@ -158,6 +158,55 @@ def test_capitalization_absolute():
     assert parse("DECEMBER 1, 2025") == date(2025, 12, 1)
 
 
+# --- Month-name punctuation variants (period after abbreviation, no comma) ---
+
+
+def test_abbrev_with_period_comma():
+    assert parse("Dec. 1, 2025") == date(2025, 12, 1)
+
+
+def test_abbrev_with_period_no_comma():
+    assert parse("Dec. 1 2025") == date(2025, 12, 1)
+
+
+def test_abbrev_no_comma():
+    assert parse("Dec 1 2025") == date(2025, 12, 1)
+
+
+def test_jan_with_period():
+    assert parse("Jan. 5, 2026") == date(2026, 1, 5)
+
+
+def test_sept_four_letter_abbrev_with_period():
+    assert parse("Sept. 9, 2025") == date(2025, 9, 9)
+
+
+def test_sep_three_letter_abbrev_with_period():
+    assert parse("Sep. 9, 2025") == date(2025, 9, 9)
+
+
+# --- Additional numeric variants ---
+
+
+def test_numeric_iso_dash_dec_4():
+    assert parse("2025-12-04") == date(2025, 12, 4)
+
+
+def test_numeric_us_slash_dec_4():
+    assert parse("12/04/2025") == date(2025, 12, 4)
+
+
+# --- Anchored offsets against periodised month abbreviation ---
+
+
+def test_day_before_abbrev_with_period():
+    assert parse("1 day before Dec. 1, 2025") == date(2025, 11, 30)
+
+
+def test_weeks_after_abbrev_with_period():
+    assert parse("2 weeks after Dec. 1, 2025") == date(2025, 12, 15)
+
+
 # --- Invalid input ---
 
 
